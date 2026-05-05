@@ -1,7 +1,7 @@
 """FastAPI service exposing /search?q=...&mode=keyword|semantic|hybrid.
 
-Run: `make api`  (or `uvicorn app.main:app --reload --port 8000`)
-Try: curl 'http://localhost:8000/search?q=cloud+computing&mode=hybrid'
+Run: `make api`  (or `uvicorn app.main:app --reload --port 8001`)
+Try: curl 'http://localhost:8001/search?q=cloud+computing&mode=hybrid'
 
 The Searcher is built once at startup (lazy). On first request the embedding
 model is loaded — subsequent requests reuse it. P99 should be < 50 ms after

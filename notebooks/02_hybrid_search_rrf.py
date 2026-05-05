@@ -40,7 +40,15 @@ bm25 = BM25Okapi(tokenized)
 
 # Vector
 embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
-client = QdrantClient(":memory:")
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.getenv("QDRANT_MODE") == "server":
+    client = QdrantClient(url=os.getenv("QDRANT_URL", "http://localhost:6333"))
+else:
+    client = QdrantClient(":memory:")
+
 client.create_collection(
     collection_name="lab19",
     vectors_config=VectorParams(size=384, distance=Distance.COSINE),

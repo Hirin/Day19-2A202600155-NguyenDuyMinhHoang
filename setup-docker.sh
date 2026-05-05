@@ -66,13 +66,13 @@ cat <<EOF
 [docker] Done. Services running:
 
   Qdrant   → http://localhost:6333  (dashboard)
-  Redis    → redis://localhost:6379
-  Postgres → postgresql://feast:feast@localhost:5432/feast_offline
+  Redis    → redis://localhost:6380
+  Postgres → postgresql://feast:feast@localhost:5433/feast_offline
 
 Activate the venv and continue:
 
     source .venv/bin/activate
-    make api       # start FastAPI on :8000
+    make api       # start FastAPI on :8001
     make lab       # open Jupyter on :8888
 
 Stop the stack later: docker compose down (state persists)

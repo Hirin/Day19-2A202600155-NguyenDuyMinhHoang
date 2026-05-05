@@ -2,12 +2,12 @@
 ## Two paths: lightweight (default, no Docker) and full Docker.
 
 VENV     := .venv
-PY       := $(VENV)/bin/python
-PIP      := $(VENV)/bin/pip
-JUPYTER  := $(VENV)/bin/jupyter
-JUPYTEXT := $(VENV)/bin/jupytext
-UVICORN  := $(VENV)/bin/uvicorn
-PYTEST   := $(VENV)/bin/pytest
+PY       := python
+PIP      := pip
+JUPYTER  := jupyter
+JUPYTEXT := jupytext
+UVICORN  := uvicorn
+PYTEST   := pytest
 
 .DEFAULT_GOAL := help
 
@@ -28,8 +28,8 @@ verify-lite: ## [lite] 5-second smoke test (Qdrant memory + BM25 + Feast SQLite)
 seed: ## [both] (Re)generate data/corpus_vn.jsonl + data/golden_set.jsonl
 	@$(PY) scripts/seed_corpus.py
 
-api: ## [lite] Start FastAPI /search on http://localhost:8000
-	@$(UVICORN) app.main:app --reload --port 8000
+api: ## [lite] Start FastAPI /search on http://localhost:8001
+	@$(UVICORN) app.main:app --reload --port 8001
 
 lab: ## [lite] Open Jupyter Lab on http://localhost:8888
 	@$(JUPYTEXT) --to notebook --update notebooks/*.py 2>/dev/null || true

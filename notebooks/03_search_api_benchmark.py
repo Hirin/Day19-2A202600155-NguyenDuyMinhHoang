@@ -15,6 +15,8 @@
 
 # %%
 import _setup  # noqa: F401
+import os
+import signal
 import statistics
 import subprocess
 import time
@@ -27,27 +29,65 @@ import httpx
 #
 # Trong production thực tế, bạn sẽ chạy `make api` ở terminal riêng. Notebook
 # này khởi động uvicorn ở background subprocess và đợi `/healthz` trả ready.
+#
+# Cell này tự dọn zombie process trên port 8001 trước khi khởi động (an toàn
+# khi chạy lại nhiều lần). Timeout 180s cho lần đầu tải model fastembed.
 
 # %%
+API_PORT = 8001
+URL = f"http://localhost:{API_PORT}"
 ROOT = Path(_setup.__file__).resolve().parent.parent
+
+# --- Bước 0: Dọn zombie uvicorn cũ nếu còn sót trên port ---
+try:
+    old_pids = subprocess.check_output(
+        ["lsof", "-ti", f":{API_PORT}"], text=True
+    ).strip().split()
+    for pid in old_pids:
+        os.kill(int(pid), signal.SIGKILL)
+    time.sleep(1)
+    print(f"  Đã dọn {len(old_pids)} zombie process trên port {API_PORT}")
+except (subprocess.CalledProcessError, ValueError):
+    pass  # Không có process nào — tốt!
+
+# --- Bước 1: Khởi động uvicorn background ---
 proc = subprocess.Popen(
-    ["uvicorn", "app.main:app", "--port", "8000", "--log-level", "warning"],
+    ["uvicorn", "app.main:app", "--port", str(API_PORT), "--log-level", "warning"],
     cwd=str(ROOT),
+    stderr=subprocess.PIPE,
 )
 
-# Đợi server up + warm (Searcher.from_corpus loads embeddings + indexes 1000 docs)
-URL = "http://localhost:8000"
-for _ in range(60):
+# --- Bước 2: Đợi server ready (tối đa 180s cho lần đầu tải model) ---
+TIMEOUT = 180
+print(f"  Đợi API server ready trên :{API_PORT} (tối đa {TIMEOUT}s) ", end="", flush=True)
+for i in range(TIMEOUT):
+    # Kiểm tra process còn sống không
+    if proc.poll() is not None:
+        stderr = proc.stderr.read().decode() if proc.stderr else ""
+        raise RuntimeError(
+            f"Uvicorn đã thoát với code {proc.returncode}.\nSTDERR:\n{stderr}"
+        )
     try:
         r = httpx.get(f"{URL}/healthz", timeout=2.0)
         if r.status_code == 200 and r.json().get("ready"):
             break
     except httpx.HTTPError:
         pass
+    if i % 10 == 0:
+        print(".", end="", flush=True)
     time.sleep(1)
 else:
-    raise RuntimeError("API didn't become ready within 60s")
+    stderr = ""
+    if proc.stderr:
+        import select
+        if select.select([proc.stderr], [], [], 0)[0]:
+            stderr = proc.stderr.read().decode()
+    proc.kill()
+    raise RuntimeError(
+        f"API không ready sau {TIMEOUT}s.\nSTDERR:\n{stderr}"
+    )
 
+print(f" OK! ({i+1}s)")
 print(httpx.get(f"{URL}/healthz").json())
 
 # %% [markdown]

@@ -21,7 +21,7 @@ Build hybrid search API + Feast feature store hoàn chỉnh, đo Precision@10 v�
 git clone https://github.com/<your-username>/Day19-Track2-VectorFeatureStore-Lab.git
 cd Day19-Track2-VectorFeatureStore-Lab
 bash setup-lite.sh    # ~60 s — venv + deps + seed corpus + smoke test
-make api &            # FastAPI on :8000
+make api &            # FastAPI on :8001
 make benchmark        # Precision@10 + latency table
 make lab              # Jupyter Lab on :8888
 ```
@@ -37,7 +37,7 @@ Khi `setup-lite.sh` báo `All checks passed`, mở
 make setup-lite      Lite: venv + deps + seed + smoke
 make verify-lite     Lite: 5-second smoke test
 make seed            Both: regenerate data/ files
-make api             Lite: FastAPI on :8000
+make api             Lite: FastAPI on :8001
 make lab             Lite: Jupyter Lab on :8888
 make benchmark       Both: Precision@10 + P99 latency table
 make test            Both: pytest
@@ -60,8 +60,8 @@ make api &
 make benchmark
 ```
 
-Yêu cầu: Docker Desktop ≥ 4.x, RAM ≥ 8 GB free, port 6333/6379/5432 không xung đột.
-Endpoints: Qdrant http://localhost:6333 · Redis :6379 · Postgres :5432
+Yêu cầu: Docker Desktop ≥ 4.x, RAM ≥ 8 GB free, port 6333/6380/5433 không xung đột.
+Endpoints: Qdrant http://localhost:6333 · Redis :6380 · Postgres :5433
 
 ---
 
@@ -174,7 +174,7 @@ học viên cũng được. Full brief + self-checklist:
 | Triệu chứng | Fix |
 |---|---|
 | `setup-lite.sh` báo `python3: command not found` | Install Python 3.10+ (https://www.python.org/downloads/) |
-| `make api` → port 8000 in use | `lsof -ti:8000 \| xargs kill -9` hoặc đổi `--port 8001` |
+| `make api` → port 8001 in use | `lsof -ti:8001 \| xargs kill -9` hoặc đổi `--port 8002` |
 | NB1 báo `expected 1000 indexed, got X` | Chưa `make seed`; chạy lại |
 | NB2 hybrid không thắng | Check RRF công thức: `1/(k + rank)` **rank 1-based**, không phải 0-based |
 | NB3 P99 > 50ms | Bình thường ở cold start. Chạy 10 query warmup trước rồi đo lại. |

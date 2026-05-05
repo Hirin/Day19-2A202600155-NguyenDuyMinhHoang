@@ -64,7 +64,15 @@ print(f"First 8 values: {sample[:8].tolist()}")
 # bằng cách đổi `QdrantClient(":memory:")` → `QdrantClient(url="http://...")`.
 
 # %%
-client = QdrantClient(":memory:")
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.getenv("QDRANT_MODE") == "server":
+    client = QdrantClient(url=os.getenv("QDRANT_URL", "http://localhost:6333"))
+else:
+    client = QdrantClient(":memory:")
+
 client.create_collection(
     collection_name="lab19",
     vectors_config=VectorParams(size=384, distance=Distance.COSINE),

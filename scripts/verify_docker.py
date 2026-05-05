@@ -44,17 +44,17 @@ def main() -> int:
         print(f"    Qdrant collections: {len(cols.collections)}")
 
         # ── 2. Redis ────────────────────────────────────────────────────
-        step("Redis reachable on :6379")
-        assert can_reach("localhost", 6379), "Redis not reachable."
+        step("Redis reachable on :6380")
+        assert can_reach("localhost", 6380), "Redis not reachable."
         import redis
-        r = redis.Redis(host="localhost", port=6379)
+        r = redis.Redis(host="localhost", port=6380)
         assert r.ping(), "Redis PING failed"
 
         # ── 3. Postgres ─────────────────────────────────────────────────
-        step("Postgres reachable on :5432")
-        assert can_reach("localhost", 5432), "Postgres not reachable."
+        step("Postgres reachable on :5433")
+        assert can_reach("localhost", 5433), "Postgres not reachable."
         import psycopg
-        with psycopg.connect("postgresql://feast:feast@localhost:5432/feast_offline") as conn:
+        with psycopg.connect("postgresql://feast:feast@localhost:5433/feast_offline") as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT 1")
                 assert cur.fetchone() == (1,)
